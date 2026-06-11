@@ -2,6 +2,8 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 
+const XLSX = require("xlsx");
+
 const DATA_DIR =
     path.join(__dirname, "data");
 
@@ -282,7 +284,7 @@ app.post(
         ) {
 
             return res.json({
-                success:false
+                success: false
             });
         }
 
@@ -305,11 +307,113 @@ app.post(
 
         res.json({
 
-            success:true,
+            success: true,
 
             imported:
                 importData.tasks.length
         });
+    }
+);
+
+/*
+====================
+EXPORT EXCEL
+====================
+*/
+
+app.get(
+    "/api/export/excel",
+    (req, res) => {
+
+        const data =
+            readJson("tasks");
+
+        const rows =
+            data.tasks.map(
+                (task, index) => ({
+
+                    STT:
+                        index + 1,
+
+                    "Tên Task":
+                        task.taskName,
+
+                    "Nội dung":
+                        task.description,
+
+                    Deadline:
+                        task.deadline,
+
+                    "Tiến độ (%)":
+                        task.progress,
+
+                    "Ghi chú":
+                        task.note || "",
+
+                    "Trạng thái":
+                        task.status,
+
+                    "Ngày tạo":
+                        task.createdAt || ""
+                })
+            );
+
+        const workbook =
+            XLSX.utils.book_new();
+
+        const worksheet =
+            XLSX.utils.json_to_sheet(
+                rows
+            );
+
+        worksheet["!cols"] = [
+
+            { wch: 6 },   // STT
+
+            { wch: 40 },  // Task
+
+            { wch: 80 },  // Nội dung
+
+            { wch: 15 },  // Deadline
+
+            { wch: 15 },  // Progress
+
+            { wch: 60 },  // Ghi chú
+
+            { wch: 18 },  // Status
+
+            { wch: 25 }   // CreatedAt
+        ];
+
+        XLSX.utils.book_append_sheet(
+
+            workbook,
+
+            worksheet,
+
+            "Personal Tasks"
+        );
+
+        const buffer =
+            XLSX.write(
+                workbook,
+                {
+                    type: "buffer",
+                    bookType: "xlsx"
+                }
+            );
+
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename=PersonalTasks_${Date.now()}.xlsx`
+        );
+
+        res.setHeader(
+            "Content-Type",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+
+        res.send(buffer);
     }
 );
 

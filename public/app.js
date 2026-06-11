@@ -269,6 +269,18 @@ document
     };
 
 document
+    .getElementById(
+        "exportExcelBtn"
+    )
+    .onclick = () => {
+
+        window.open(
+            "/api/export/excel",
+            "_blank"
+        );
+    };
+
+document
     .getElementById("saveTask")
     .onclick = async () => {
 
