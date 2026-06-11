@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="vi" spellcheck="false">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Bảng Phân Công Nhiệm Vụ
+    </title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="header">
+
+        <h1>
+            QUẢN LÝ CÔNG VIỆC CÁ NHÂN
+        </h1>
+
+    </div>
+
+    <div class="tab-container">
+
+        <button class="tab active">
+            DANH SÁCH NHIỆM VỤ
+        </button>
+
+    </div>
+
+    </div>
+    <div class="dashboard">
+
+        <div class="card">
+            <span id="totalTasks">0</span>
+            <p>Tổng Task</p>
+        </div>
+
+        <div class="card">
+            <span id="doneTasks">0</span>
+            <p>Done</p>
+        </div>
+
+        <div class="card">
+            <span id="doingTasks">0</span>
+            <p>In Progress</p>
+        </div>
+
+        <div class="card">
+            <span id="pendingTasks">0</span>
+            <p>Pending</p>
+        </div>
+
+    </div>
+
+    <div class="toolbar">
+
+        <button id="addTaskBtn">
+            THÊM TASK
+        </button>
+
+        <button id="refreshBtn">
+            LÀM MỚI
+        </button>
+
+        <button id="syncBtn">
+            ĐỒNG BỘ GITHUB
+        </button>
+
+        <button id="importBtn">
+            IMPORT JSON
+        </button>
+
+        <input type="file" id="jsonFile" accept=".json" hidden>
+
+    </div>
+
+    <div id="contentArea">
+
+        <div id="taskSection">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Tên Task</th>
+                        <th>Nội dung</th>
+                        <th>Deadline</th>
+                        <th>Tiến độ</th>
+                        <th>Ghi chú</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+
+                <tbody id="taskTable">
+                </tbody>
+
+            </table>
+
+        </div>
+
+            <div id="progressContainer">
+
+            </div>
+
+        </div>
+
+        </div>
+
+    </div>
+
+    <div id="taskModal" class="modal hidden">
+
+        <div class="modal-content">
+
+            <h2>
+                Thêm Task
+            </h2>
+
+            <input id="taskName" placeholder="Tên Task">
+
+            <textarea id="description" placeholder="Nội dung nhiệm vụ"></textarea>
+
+            <input id="deadline" type="date">
+
+            <input id="progress" type="number" min="0" max="100" placeholder="Tiến độ hoàn thành (%)">
+
+            <textarea id="note" placeholder="Ghi chú"></textarea>
+
+            <select id="status">
+
+                <option>
+                    Pending
+                </option>
+
+                <option>
+                    In Progress
+                </option>
+
+                <option>
+                    Done
+                </option>
+
+            </select>
+
+            <button id="saveTask">
+
+                LƯU
+            </button>
+
+            <button id="closeModal">
+
+                ĐÓNG
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="editModal" class="modal hidden">
+
+        <div class="modal-content">
+
+            <h2>
+                Chỉnh sửa Task
+            </h2>
+
+            <input id="editTaskName" placeholder="Tên Task">
+
+            <textarea id="editDescription" placeholder="Nội dung"></textarea>
+
+            <input id="editDeadline" type="date">
+
+            <input id="editProgress" type="number" min="0" max="100" placeholder="Tiến độ">
+
+            <textarea id="editNote" placeholder="Ghi chú"></textarea>
+
+            <select id="editStatus">
+
+                <option>
+                    Pending
+                </option>
+
+                <option>
+                    In Progress
+                </option>
+
+                <option>
+                    Done
+                </option>
+
+            </select>
+
+            <button id="updateTaskBtn">
+                CẬP NHẬT
+            </button>
+
+            <button id="closeEditModal">
+                ĐÓNG
+            </button>
+
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
