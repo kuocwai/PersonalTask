@@ -1,4 +1,3 @@
-let currentFile = "tasks";
 
 const table =
     document.getElementById("taskTable");
@@ -79,6 +78,93 @@ function getDeadlineStatus(deadline) {
     return "";
 }
 
+async function loadTasks() {
+
+    const response =
+        await fetch(
+            "/api/tasks"
+        );
+
+    const data =
+        await response.json();
+
+    table.innerHTML = "";
+
+    updateDashboard(
+        data.tasks
+    );
+
+    data.tasks.forEach(task => {
+
+        table.innerHTML += `
+
+        <tr>
+
+            <td>${task.taskName}</td>
+
+            <td>${task.description}</td>
+
+            <td>
+
+                ${task.deadline}
+
+                <br>
+
+                ${getDeadlineStatus(
+                    task.deadline
+                )}
+
+            </td>
+
+            <td>
+
+                <div class="task-progress">
+
+                    <div
+                        class="task-progress-fill"
+                        style="width:${task.progress}%">
+
+                        ${task.progress}%
+
+                    </div>
+
+                </div>
+
+            </td>
+
+            <td>${task.note || ""}</td>
+
+            <td>
+
+                ${getStatusBadge(
+                    task.status
+                )}
+
+            </td>
+
+            <td>
+
+                <button
+                    onclick="editTask(${task.id})">
+
+                    Sửa
+
+                </button>
+
+                <button
+                    onclick="deleteTask(${task.id})">
+
+                    Xóa
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+    });
+}
 
 function updateDashboard(tasks) {
 
@@ -123,39 +209,6 @@ document
                 "hidden"
             );
     };
-
-document
-    .querySelectorAll(".tab")
-    .forEach(btn => {
-
-        btn.addEventListener(
-            "click",
-            () => {
-
-                document
-                    .querySelectorAll(".tab")
-                    .forEach(t =>
-                        t.classList.remove(
-                            "active"
-                        )
-                    );
-
-                btn.classList.add(
-                    "active"
-                );
-
-                if (btn.dataset.file) {
-
-                    currentFile =
-                        btn.dataset.file;
-
-                    showTaskSection();
-
-                    loadTasks();
-                }
-            }
-        );
-    });
 
 document
     .getElementById("addTaskBtn")
@@ -255,7 +308,7 @@ document
         }
 
         await fetch(
-            `/api/tasks/${currentFile}`,
+            `/api/tasks`,
             {
                 method: "POST",
 
@@ -294,7 +347,7 @@ async function deleteTask(id) {
     }
 
     await fetch(
-        `/api/tasks/${currentFile}/${id}`,
+        `/api/tasks/${id}`,
         {
             method: "DELETE"
         }
@@ -307,7 +360,7 @@ async function editTask(id) {
 
     const response =
         await fetch(
-            `/api/tasks/${currentFile}`
+            `/api/tasks`
         );
 
     const data =
@@ -409,7 +462,7 @@ document
 
         await fetch(
 
-            `/api/tasks/${currentFile}/${currentEditId}`,
+            `/api/tasks/${currentEditId}`,
 
             {
 

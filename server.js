@@ -289,57 +289,44 @@ app.post(
     "/api/import",
     (req, res) => {
 
+        const data =
+            readJson("tasks");
+
         const importData =
             req.body;
 
         if (
-            !Array.isArray(importData)
+            !importData.tasks
         ) {
 
             return res.json({
-                success: false
+                success:false
             });
         }
 
-        let imported = 0;
+        importData.tasks
+            .forEach(task => {
 
-        importData.forEach(group => {
+                task.id =
+                    Date.now() +
+                    Math.floor(
+                        Math.random() * 10000
+                    );
 
-            const target =
-                group.target;
+                data.tasks.push(task);
+            });
 
-            const data =
-                readJson(target);
-
-            (group.tasks || [])
-                .forEach(task => {
-
-                    task.id =
-                        Date.now() +
-                        Math.floor(
-                            Math.random() * 10000
-                        );
-
-                    task.createdAt =
-                        new Date()
-                            .toISOString();
-
-                    data.tasks.push(task);
-
-                    imported++;
-                });
-
-            writeJson(
-                target,
-                data
-            );
-        });
+        writeJson(
+            "tasks",
+            data
+        );
 
         res.json({
 
-            success: true,
+            success:true,
 
-            imported
+            imported:
+                importData.tasks.length
         });
     }
 );
