@@ -39,22 +39,32 @@ function getStatusBadge(status) {
 
 function getDeadlineStatus(deadline) {
 
+    const parts =
+        deadline.split("/");
+
+    const due =
+        new Date(
+            parts[2],
+            parts[1] - 1,
+            parts[0]
+        );
+
     const today =
         new Date();
 
-    const due =
-        new Date(deadline);
+    today.setHours(
+        0, 0, 0, 0
+    );
+
+    due.setHours(
+        0, 0, 0, 0
+    );
 
     const diff =
-
         Math.ceil(
-
             (due - today)
-
             /
-
             (1000 * 60 * 60 * 24)
-
         );
 
     if (diff < 0) {
@@ -111,8 +121,8 @@ async function loadTasks() {
                 <br>
 
                 ${getDeadlineStatus(
-                    task.deadline
-                )}
+            task.deadline
+        )}
 
             </td>
 
@@ -137,8 +147,8 @@ async function loadTasks() {
             <td>
 
                 ${getStatusBadge(
-                    task.status
-                )}
+            task.status
+        )}
 
             </td>
 
