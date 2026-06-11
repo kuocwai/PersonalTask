@@ -115,12 +115,6 @@ app.post(
             data
         );
 
-        addLog(
-            "tasks",
-            "CREATE",
-            task.taskName
-        );
-
         res.json({
             success: true
         });
@@ -181,12 +175,6 @@ app.put(
             data
         );
 
-        addLog(
-            "tasks",
-            "UPDATE",
-            task.taskName
-        );
-
         res.json({
             success: true
         });
@@ -224,12 +212,6 @@ app.delete(
         writeJson(
             "tasks",
             data
-        );
-
-        addLog(
-            "tasks",
-            "DELETE",
-            task?.taskName || ""
         );
 
         res.json({
