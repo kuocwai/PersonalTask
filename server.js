@@ -2,23 +2,22 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 
+const DATA_DIR =
+    path.join(__dirname, "data");
+
+if (!fs.existsSync(DATA_DIR)) {
+
+    fs.mkdirSync(DATA_DIR);
+}
+
 const app = express();
 const PORT = 3000;
 
 const { exec } =
     require("child_process");
 
-const TASK_FILE =
-    path.join(
-        DATA_DIR,
-        "tasks.json"
-    );
-
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static(path.join(__dirname, "public")));
-
-const DATA_DIR =
-    path.join(__dirname, "data");
 
 function getFile(name) {
 
@@ -54,43 +53,6 @@ function writeJson(name, data) {
             null,
             4
         )
-    );
-}
-
-function addLog(
-    user,
-    action,
-    taskName = ""
-) {
-
-    const logs =
-        readJson("activity-log");
-
-    if (!logs.logs) {
-
-        logs.logs = [];
-    }
-
-    logs.logs.unshift({
-
-        id: Date.now(),
-
-        user,
-
-        action,
-
-        taskName,
-
-        time:
-            new Date()
-                .toLocaleString(
-                    "vi-VN"
-                )
-    });
-
-    writeJson(
-        "activity-log",
-        logs
     );
 }
 
