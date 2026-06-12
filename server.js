@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const fs = require("fs");
 
-const XLSX = require("xlsx");
+const ExcelJS = require("exceljs");
 
 const DATA_DIR =
     path.join(__dirname, "data");
@@ -323,97 +323,272 @@ EXPORT EXCEL
 
 app.get(
     "/api/export/excel",
-    (req, res) => {
+    async (req, res) => {
 
         const data =
             readJson("tasks");
 
-        const rows =
-            data.tasks.map(
-                (task, index) => ({
-
-                    STT:
-                        index + 1,
-
-                    "Tên Task":
-                        task.taskName,
-
-                    "Nội dung":
-                        task.description,
-
-                    Deadline:
-                        task.deadline,
-
-                    "Tiến độ (%)":
-                        task.progress,
-
-                    "Ghi chú":
-                        task.note || "",
-
-                    "Trạng thái":
-                        task.status,
-
-                    "Ngày tạo":
-                        task.createdAt || ""
-                })
-            );
-
         const workbook =
-            XLSX.utils.book_new();
+            new ExcelJS.Workbook();
 
-        const worksheet =
-            XLSX.utils.json_to_sheet(
-                rows
+        const sheet =
+            workbook.addWorksheet(
+                "Tasks"
             );
 
-        worksheet["!cols"] = [
+        sheet.columns = [
 
-            { wch: 6 },   // STT
+            {
+                header: "Tên Task",
+                key: "taskName",
+                width: 35
+            },
 
-            { wch: 40 },  // Task
+            {
+                header: "Nội dung",
+                key: "description",
+                width: 60
+            },
 
-            { wch: 80 },  // Nội dung
+            {
+                header: "Deadline",
+                key: "deadline",
+                width: 15
+            },
 
-            { wch: 15 },  // Deadline
+            {
+                header: "Tiến độ",
+                key: "progress",
+                width: 15
+            },
 
-            { wch: 15 },  // Progress
+            {
+                header: "Ghi chú",
+                key: "note",
+                width: 40
+            },
 
-            { wch: 60 },  // Ghi chú
-
-            { wch: 18 },  // Status
-
-            { wch: 25 }   // CreatedAt
+            {
+                header: "Trạng thái",
+                key: "status",
+                width: 18
+            }
         ];
 
-        XLSX.utils.book_append_sheet(
+        /*
+        HEADER STYLE
+        */
 
-            workbook,
+        sheet.getRow(1).eachCell(cell => {
 
-            worksheet,
+            cell.font = {
 
-            "Personal Tasks"
-        );
+                bold: true,
 
-        const buffer =
-            XLSX.write(
-                workbook,
-                {
-                    type: "buffer",
-                    bookType: "xlsx"
+                color: {
+                    argb: "FFFFFFFF"
                 }
-            );
+            };
 
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename=PersonalTasks_${Date.now()}.xlsx`
-        );
+            cell.fill = {
+
+                type: "pattern",
+
+                pattern: "solid",
+
+                fgColor: {
+                    argb: "FFD32F2F"
+                }
+            };
+
+            cell.alignment = {
+
+                vertical: "middle",
+
+                horizontal: "center"
+            };
+        });
+
+        /*
+====================
+TÔ MÀU THEO DEADLINE
+====================
+*/
+
+        const deadlineGroups = {};
+
+        let colorIndex = 0;
+
+        data.tasks.forEach(task => {
+
+            if (!deadlineGroups[task.deadline]) {
+
+                deadlineGroups[task.deadline] =
+
+                    colorIndex % 2 === 0
+
+                        ? "FFCFE2F3"   // xanh nhạt
+
+                        : "FFEFEFEF";  // xám nhạt
+
+                colorIndex++;
+            }
+        });
+
+        /*
+        DATA
+        */
+
+        data.tasks.forEach(task => {
+
+            const row =
+                sheet.addRow({
+
+                    taskName:
+                        task.taskName,
+
+                    description:
+                        task.description,
+
+                    deadline:
+                        task.deadline,
+
+                    progress:
+                        `${task.progress}%`,
+
+                    note:
+                        task.note,
+
+                    status:
+                        task.status
+                });
+
+            const rowColor =
+                deadlineGroups[
+                task.deadline
+                ];
+
+            row.eachCell(cell => {
+
+                cell.fill = {
+
+                    type: "pattern",
+
+                    pattern: "solid",
+
+                    fgColor: {
+                        argb:
+                            rowColor
+                    }
+                };
+
+                cell.border = {
+
+                    top: {
+                        style: "thin"
+                    },
+
+                    left: {
+                        style: "thin"
+                    },
+
+                    bottom: {
+                        style: "thin"
+                    },
+
+                    right: {
+                        style: "thin"
+                    }
+                };
+
+                cell.alignment = {
+
+                    vertical:
+                        "middle",
+
+                    wrapText:
+                        true
+                };
+            });
+
+            /*
+            QUÁ HẠN -> ĐỎ
+            */
+
+            const deadline =
+                task.deadline;
+
+            const today =
+                new Date();
+
+            const due =
+                new Date(
+                    deadline
+                );
+
+            if (
+                due < today &&
+                task.status !==
+                "Done"
+            ) {
+
+                row.eachCell(cell => {
+
+                    cell.fill = {
+
+                        type: "pattern",
+
+                        pattern: "solid",
+
+                        fgColor: {
+                            argb:
+                                "FFCFE2F3"
+                        }
+                    };
+                });
+            }
+        });
+
+        /*
+        FILTER
+        */
+
+        sheet.autoFilter = {
+
+            from: "A1",
+
+            to: "F1"
+        };
+
+        /*
+        FREEZE HEADER
+        */
+
+        sheet.views = [
+
+            {
+                state:
+                    "frozen",
+
+                ySplit: 1
+            }
+        ];
 
         res.setHeader(
             "Content-Type",
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         );
 
-        res.send(buffer);
+        res.setHeader(
+            "Content-Disposition",
+            "attachment; filename=Tasks.xlsx"
+        );
+
+        await workbook.xlsx.write(
+            res
+        );
+
+        res.end();
     }
 );
 

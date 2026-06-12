@@ -270,14 +270,12 @@ document
 
 document
     .getElementById(
-        "exportExcelBtn"
+        "exportBtn"
     )
     .onclick = () => {
 
-        window.open(
-            "/api/export/excel",
-            "_blank"
-        );
+        window.location.href =
+            "/api/export/excel";
     };
 
 document
